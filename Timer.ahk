@@ -1,7 +1,8 @@
 /*
     AutoHotkey:Asynchronous Timer
     Copyright © 2013 Donald Atkinson (a.k.a. FuzzicalLogic)
-    
+    ----------------------------------------------------------------------------
+
     An External Timer that runs in its own memory space to post windows messages
     a specified intervals. If /time is specified, the script will post a message
     when the script completes. If /interval is specified, the script will post a
@@ -28,7 +29,7 @@
     /interval  - The frequency (in ms) of messages
     /debug     - Whether to display debug messages (currently only in msgbox)
     
---------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------
 */
 
 #NoEnv
