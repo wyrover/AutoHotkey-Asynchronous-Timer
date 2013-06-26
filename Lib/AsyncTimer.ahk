@@ -44,7 +44,7 @@ DetectHiddenWindows, on
 ; Initialize values
     AsyncTimer_TimerID      := 0
     AsyncTimer_Millisecs    := 0
-	AsyncTimer_MessageID    := 1024
+    AsyncTimer_MessageID    := 1024
 
 ; Status Variables
     AsyncTimer_IsStopped    := false
@@ -97,11 +97,11 @@ DetectHiddenWindows, on
     if (AsyncTimer_Interval)
         OnMessage(PAUSE_MESSAGE_ID, "PauseAsyncTimer")
     
-	if (!AsyncTimer_ForPID) {
-		if (AsyncTimer_Debug)
-			msgbox An Invalid HWND was provided to AsyncTimer.
-		ExitApp 
-	}
+    if (!AsyncTimer_ForPID) {
+        if (AsyncTimer_Debug)
+            msgbox An Invalid HWND was provided to AsyncTimer.
+        ExitApp 
+    }
 
 ; Prepare for Stop Message
 	if (AsyncTimer_Interval && AsyncTimer_Millisecs)
