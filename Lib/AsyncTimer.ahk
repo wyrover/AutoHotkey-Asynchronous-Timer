@@ -37,11 +37,19 @@
 #SingleInstance off
 DetectHiddenWindows, on
 
+    PAUSE_MESSAGE_ID    := 0x0400
+    RESUME_MESSAGE_ID   := 0x0401
+    STOP_MESSAGE_ID     := 0x0402
+    
 ; Initialize values
-  AsyncTimer_TimerID := 0
-	AsyncTimer_Millisecs := 0
-	AsyncTimer_MessageID := 1024
+    AsyncTimer_TimerID      := 0
+    AsyncTimer_Millisecs    := 0
+	AsyncTimer_MessageID    := 1024
 
+; Status Variables
+    AsyncTimer_IsStopped    := false
+    AsyncTimer_IsPaused     := false
+    
 ; Handle Script Parameters
 ; ------------------------
 ; This script doesn't do anything. It just waits for the passed amount of time and returns
@@ -85,6 +93,10 @@ DetectHiddenWindows, on
 			AsyncTimer_Debug := true
 	}
 	
+    OnMessage(STOP_MESSAGE_ID, "StopAsyncTimer")
+    if (AsyncTimer_Interval)
+        OnMessage(PAUSE_MESSAGE_ID, "PauseAsyncTimer")
+    
 	if (!AsyncTimer_ForPID) {
 		if (AsyncTimer_Debug)
 			msgbox An Invalid HWND was provided to AsyncTimer.
@@ -94,21 +106,59 @@ DetectHiddenWindows, on
 ; Prepare for Stop Message
 	if (AsyncTimer_Interval && AsyncTimer_Millisecs)
 	{	While (AsyncTimer_Millisecs > AsyncTimer_Interval)
-		{	Sleep, %AsyncTimer_Interval%
-			AsyncTimer_Millisecs := AsyncTimer_Millisecs - AsyncTimer_Interval
-			PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id %AsyncTimer_ForPID%
+		{	if (AsyncTimer_IsStopped) {
+                break
+            }
+            else if (AsyncTimer_IsPaused) {
+                Sleep, %AsyncTimer_Interval%
+            }
+            else {
+                Sleep, %AsyncTimer_Interval%
+    			AsyncTimer_Millisecs := AsyncTimer_Millisecs - AsyncTimer_Interval
+    			PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id %AsyncTimer_ForPID%
+            }
  		}
 	}
 	else if (AsyncTimer_Interval && !AsyncTimer_Millisecs)
 	{	While (AsyncTimer_Interval)
-		{	Sleep, %AsyncTimer_Interval%
-			PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id %AsyncTimer_ForPID%
+		{   if (AsyncTimer_IsStopped) {
+                break
+            }
+            else if (AsyncTimer_IsPaused) {
+                Sleep, %AsyncTimer_Interval%
+            }
+            else {
+                Sleep, %AsyncTimer_Interval%
+			    PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id %AsyncTimer_ForPID%
+            }
 		}
 	}
-
+    
 ; Do nothing for the specified amount of time
-	Sleep, %AsyncTimer_Millisecs%
+    if (! AsyncTimer_IsStopped)
+	    Sleep, %AsyncTimer_Millisecs%
 ; Return the expected answer
-	PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id %AsyncTimer_ForPID%
+    if (! AsyncTimer_IsStopped)
+	    PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id %AsyncTimer_ForPID%
 	ExitApp
 
+StopAsyncTimer(wParam, lParam, msg, hwnd) {
+    if (hwnd = AsyncTimer_ForPID)
+        AsyncTimer_IsStopped := true
+}
+
+PauseAsyncTimer(wParam, lParam, msg, hwnd) {
+    if (hwnd = AsyncTimer_ForPID) {
+        AsyncTimer_IsPaused := true
+        OnMessage(RESUME_MESSAGE_ID, "ResumeAsyncTimer")
+        OnMessage(PAUSE_MESSAGE_ID, "")
+    }
+}
+
+ResumeAsyncTimer(wParam, lParam, msg, hwnd) {
+    if (hwnd = AsyncTimer_ForPID) {
+        AsyncTimer_IsPaused := true
+        OnMessage(PAUSE_MESSAGE_ID, "PauseAsyncTimer")
+        OnMessage(RESUME_MESSAGE_ID, "")
+    }
+}
