@@ -41,7 +41,6 @@ SetTimer(pCallback := 0, pTime := 0, pInterval := 0, pMessage := 0, pTimerId := 
     return timer.Start()
 }
 
-
     class AsyncTimerPrivate {
         static MSG_PAUSE_ID  := 0x0CEC
         static MSG_RESUME_ID := 0x0CED
@@ -241,10 +240,10 @@ ResolveFunction(name) {
         fxn := 0
         to := resolve.MaxIndex() 
         Loop %to% {
-	    if (!fxn) {
+        if (!fxn) {
                 e := resolve[A_Index]
                 if (Func(e))
-	            fxn := Func(e)
+                    fxn := Func(e)
                 else
                     fxn := %e%
             }
