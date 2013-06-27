@@ -50,49 +50,50 @@ DetectHiddenWindows, on
     AsyncTimer_IsStopped    := false
     AsyncTimer_IsPaused     := false
     
+
 ; Handle Script Parameters
 ; ------------------------
 ; This script doesn't do anything. It just waits for the passed amount of time and returns
 ; the value that was sent to it. This allows multiple "Timers" to be run "asynchronously"
 ; with different responses.
 
-	Loop %0%
-	{
-		param := %a_index%
-		if (param = "/id")
-		{	idx := a_index + 1
-	                val := %idx%
-			if (val)
-				AsyncTimer_TimerID = %val%
-		}
-		else if (param = "/time")
-		{	idx := a_index + 1
-			val := %idx%
-			if (val)
-				AsyncTimer_Millisecs = %val%
-		}
-		else if (param = "/hwnd")
-                {	idx := a_index + 1
-			val := %idx%
-			if (val)
-				AsyncTimer_ForPID = %val%
-		}
-		else if (param = "/msgid")
-		{	idx := a_index + 1
-			val := %idx%
-			if (val)
-				AsyncTimer_MessageID = %val%
-		}
-		else if (param = "/interval")
-		{	idx := a_index + 1
-			val := %idx%
-			if (val)
-				AsyncTimer_Interval = %val%
-		}
-		else if (param = "/debug")
-			AsyncTimer_Debug := true
-	}
-	
+    Loop %0%
+    {
+        param := %a_index%
+        if (param = "/id")
+        {   idx := a_index + 1
+            val := %idx%
+            if (val)
+                AsyncTimer_TimerID = %val%
+        }
+        else if (param = "/time")
+        {   idx := a_index + 1
+            val := %idx%
+            if (val)
+                AsyncTimer_Millisecs = %val%
+        }
+        else if (param = "/hwnd")
+        {   idx := a_index + 1
+            val := %idx%
+            if (val)
+                AsyncTimer_ForPID = %val%
+        }
+        else if (param = "/msgid")
+        {   idx := a_index + 1
+            val := %idx%
+            if (val)
+                AsyncTimer_MessageID = %val%
+        }
+        else if (param = "/interval")
+        {   idx := a_index + 1
+            val := %idx%
+            if (val)
+                AsyncTimer_Interval = %val%
+        }
+        else if (param = "/debug")
+            AsyncTimer_Debug := true
+    }
+
     OnMessage(STOP_MESSAGE_ID, "StopAsyncTimer")
     if (AsyncTimer_Interval)
         OnMessage(PAUSE_MESSAGE_ID, "PauseAsyncTimer")
@@ -104,9 +105,9 @@ DetectHiddenWindows, on
     }
 
 ; Prepare for Stop Message
-	if (AsyncTimer_Interval && AsyncTimer_Millisecs)
-	{	While (AsyncTimer_Millisecs > AsyncTimer_Interval)
-		{	if (AsyncTimer_IsStopped) {
+    if (AsyncTimer_Interval && AsyncTimer_Millisecs)
+    {   While (AsyncTimer_Millisecs > AsyncTimer_Interval)
+        {   if (AsyncTimer_IsStopped) {
                 break
             }
             else if (AsyncTimer_IsPaused) {
@@ -114,14 +115,16 @@ DetectHiddenWindows, on
             }
             else {
                 Sleep, %AsyncTimer_Interval%
-    			AsyncTimer_Millisecs := AsyncTimer_Millisecs - AsyncTimer_Interval
-    			PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id %AsyncTimer_ForPID%
+                AsyncTimer_Millisecs := AsyncTimer_Millisecs - AsyncTimer_Interval
+                PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id 
+
+%AsyncTimer_ForPID%
             }
- 		}
-	}
-	else if (AsyncTimer_Interval && !AsyncTimer_Millisecs)
-	{	While (AsyncTimer_Interval)
-		{   if (AsyncTimer_IsStopped) {
+        }
+    }
+    else if (AsyncTimer_Interval && !AsyncTimer_Millisecs)
+    {   While (AsyncTimer_Interval)
+        {   if (AsyncTimer_IsStopped) {
                 break
             }
             else if (AsyncTimer_IsPaused) {
@@ -129,18 +132,24 @@ DetectHiddenWindows, on
             }
             else {
                 Sleep, %AsyncTimer_Interval%
-			    PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id %AsyncTimer_ForPID%
+                PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id 
+
+%AsyncTimer_ForPID%
             }
-		}
-	}
+        }
+    }
+
     
 ; Do nothing for the specified amount of time
     if (! AsyncTimer_IsStopped)
-	    Sleep, %AsyncTimer_Millisecs%
+        Sleep, %AsyncTimer_Millisecs%
 ; Return the expected answer
-    if (! AsyncTimer_IsStopped)
-	    PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, , , ahk_id %AsyncTimer_ForPID%
-	ExitApp
+    if (! AsyncTimer_IsStopped) {
+        PostMessage, %AsyncTimer_MessageID%, %AsyncTimer_TimerID%, %AsyncTimer_TimerID%, , ahk_id 
+
+%AsyncTimer_ForPID%
+    }
+    ExitApp
 
 StopAsyncTimer(wParam, lParam, msg, hwnd) {
     if (hwnd = AsyncTimer_ForPID)
